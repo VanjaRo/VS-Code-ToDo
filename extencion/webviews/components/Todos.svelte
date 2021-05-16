@@ -3,6 +3,8 @@
   import type { User } from "../types";
 
   export let user: User;
+  export let accessToken: string;
+
   let text = "";
   let todos: Array<{ text: string; completed: boolean }> = [];
   onMount(async () => {
@@ -15,6 +17,14 @@
           break;
       }
     });
+
+    const response = await fetch(`${apiBaseUrl}/todo`, {
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const payload = await response.json();
+    todos = payload.todos;
   });
 
 </script>
@@ -22,8 +32,20 @@
 <div>Hellow: {user.name}</div>
 
 <form
-  on:submit|preventDefault={() => {
-    todos = [{ text, completed: false }, ...todos];
+  on:submit|preventDefault={async () => {
+    // todos = [{ text, completed: false }, ...todos];
+    const response = await fetch(`${apiBaseUrl}/todo`, {
+      method: "POST",
+      body: JSON.stringify({
+        text,
+      }),
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const { todo } = await response.json();
+    todos = [todo, ...todos];
     text = "";
   }}
 >
