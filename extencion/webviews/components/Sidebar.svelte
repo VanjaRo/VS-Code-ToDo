@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import type { User } from "../types";
-  import Todos from "./Todos.svelte";
+  import ToDos from "./ToDos.svelte";
 
   let accessToken = "";
   let loading = true;
@@ -30,7 +30,7 @@
 {#if loading}
   <div>Loading ...</div>
 {:else if user}
-  <Todos {user} />
+  <ToDos {user} {accessToken} />
   <button
     on:click={() => {
       accessToken = "";
