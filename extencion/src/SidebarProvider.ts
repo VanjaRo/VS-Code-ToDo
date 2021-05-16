@@ -29,7 +29,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           break;
         }
         case "authenticate": {
-          authenticate();
+          authenticate(() => {
+            webviewView.webview.postMessage({
+              type: "token",
+              value: TokenManager.getToken(),
+            });
+          });
           break;
         }
         case "get-token": {
