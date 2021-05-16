@@ -8,6 +8,7 @@ import passport from "passport";
 import { Strategy as GitHubStrategy } from "passport-github";
 import { User } from "./entities/User";
 import jwt from "jsonwebtoken";
+import cors from "cors";
 
 const main = async () => {
   await createConnection({
@@ -22,6 +23,7 @@ const main = async () => {
   passport.serializeUser((user: any, done) => {
     done(null, user.accessToken);
   });
+  app.use(cors({ origin: "*" }));
   app.use(passport.initialize());
 
   passport.use(
@@ -62,6 +64,37 @@ const main = async () => {
       res.redirect(`http://localhost:54321/auth/${req.user.accessToken}`);
     }
   );
+
+  app.get("/me", async (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      res.send({ user: null });
+      return;
+    }
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+      res.send({ user: null });
+      return;
+    }
+
+    let userId = "";
+
+    try {
+      const payload: any = jwt.verify(token, process.env.PRIVAT_KEY_JWT);
+      userId = payload.userId;
+    } catch (err) {
+      res.send({ user: null });
+      return;
+    }
+
+    if (!userId) {
+      res.send({ user: null });
+      return;
+    }
+
+    const user = await User.findOne(userId);
+    res.send({ user });
+  });
 
   app.get("/", (_req, res) => {
     res.send("Hellow World!");
