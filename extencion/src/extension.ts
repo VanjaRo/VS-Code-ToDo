@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { authenticate } from "./authenticate";
 import { HelloWorldPanel } from "./HelloWorldPanel";
 import { SidebarProvider } from "./SidebarProvider";
 
@@ -40,18 +41,17 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
+    vscode.commands.registerCommand("vstodo.authenticate", () => {
+      authenticate();
+    })
+  );
+
+  context.subscriptions.push(
     vscode.commands.registerCommand("vstodo.refresh", async () => {
-      // HelloWorldPanel.kill();
-      // HelloWorldPanel.createOrShow(context.extensionUri);
       await vscode.commands.executeCommand("workbench.action.closeSidebar");
       await vscode.commands.executeCommand(
         "workbench.view.extension.vstodo-sidebar-view"
       );
-      // setTimeout(() => {
-      //   vscode.commands.executeCommand(
-      //     "workbench.action.webview.openDeveloperTools"
-      //   );
-      // }, 500);
     })
   );
 
