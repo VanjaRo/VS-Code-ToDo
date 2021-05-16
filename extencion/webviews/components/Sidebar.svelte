@@ -31,7 +31,13 @@
   <div>Loading ...</div>
 {:else if user}
   <Todos {user} />
-  <button>Logout</button>
+  <button
+    on:click={() => {
+      accessToken = "";
+      user = null;
+      tsvscode.postMessage({ type: "logout", value: undefined });
+    }}>Logout</button
+  >
 {:else}
   <button
     on:click={() => {
