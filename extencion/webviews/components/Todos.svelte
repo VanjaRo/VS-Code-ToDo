@@ -6,14 +6,30 @@
   export let accessToken: string;
 
   let text = "";
-  let todos: Array<{ text: string; completed: boolean }> = [];
+  let todos: Array<{ text: string; completed: boolean; id: number }> = [];
+
+  async function addTodo(t: string) {
+    const response = await fetch(`${apiBaseUrl}/todo`, {
+      method: "POST",
+      body: JSON.stringify({
+        text: t,
+      }),
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const { todo } = await response.json();
+    todos = [todo, ...todos];
+  }
+
   onMount(async () => {
     window.addEventListener("message", async (event) => {
       const message = event.data;
       console.log({ message });
       switch (message.type) {
         case "new-todo":
-          todos = [{ text: message.value, completed: false }, ...todos];
+          addTodo(message.value);
           break;
       }
     });
@@ -33,19 +49,7 @@
 
 <form
   on:submit|preventDefault={async () => {
-    // todos = [{ text, completed: false }, ...todos];
-    const response = await fetch(`${apiBaseUrl}/todo`, {
-      method: "POST",
-      body: JSON.stringify({
-        text,
-      }),
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${accessToken}`,
-      },
-    });
-    const { todo } = await response.json();
-    todos = [todo, ...todos];
+    addTodo(text);
     text = "";
   }}
 >
@@ -56,8 +60,19 @@
   {#each todos as todo}
     <li
       class:complete={todo.completed}
-      on:click={() => {
+      on:click={async () => {
         todo.completed = !todo.completed;
+        const response = await fetch(`${apiBaseUrl}/todo`, {
+          method: "PUT",
+          body: JSON.stringify({
+            id: todo.id,
+          }),
+          headers: {
+            "content-type": "application/json",
+            authorization: `Bearer ${accessToken}`,
+          },
+        });
+        console.log(await response.json());
       }}
     >
       {todo["text"]}

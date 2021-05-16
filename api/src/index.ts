@@ -85,6 +85,17 @@ const main = async () => {
     res.send({ todo });
   });
 
+  app.put("/todo", isAuth, async (req: any, res) => {
+    const todo = await Todo.findOne(req.body.id);
+    if (!todo) {
+      res.send({ todo: null });
+      return;
+    }
+    todo.completed = !todo.completed;
+    await todo.save();
+    res.send({ todo });
+  });
+
   app.get("/me", async (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
